@@ -1,0 +1,4 @@
+apiVersion: v2
+name: debezium
+version: "0.0.0"
+appVersion: "3.0.0.Final"

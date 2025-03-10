@@ -1,0 +1,52 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: elasticsearch
+spec:
+  rules:
+    - name: elasticsearch
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - elasticsearch
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              tier: high
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: registry-1.docker.io/bitnamicharts
+    chart: elasticsearch
+    targetRevision: "21.4.8"
+    helm:
+      valuesObject:
+        master:
+          masterOnly: false
+          replicaCount: 1
+        data:
+          replicaCount: 0
+        coordinating:
+          replicaCount: 0
+        ingest:
+          replicaCount: 0
+  destination:
+    namespace: "elasticsearch"
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Wait=true

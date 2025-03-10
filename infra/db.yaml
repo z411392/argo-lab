@@ -1,0 +1,48 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: db
+spec:
+  rules:
+    - name: db
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - db
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              tier: medium
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: db
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: registry-1.docker.io/bitnamicharts
+      chart: mysql
+      targetRevision: "12.3.1"
+      helm:
+        valuesObject:
+          auth:
+            createDatabase: false
+          primary:
+            nodeSelector:
+              tier: medium
+  destination:
+    namespace: "db"
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Wait=true

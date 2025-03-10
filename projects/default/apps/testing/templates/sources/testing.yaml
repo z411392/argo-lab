@@ -1,0 +1,21 @@
+apiVersion: sources.knative.dev/v1alpha1
+kind: RabbitmqSource
+metadata:
+  name: testing
+  namespace: "{{.Release.Namespace}}"
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq
+    namespace: rabbitmq
+  rabbitmqResourcesConfig:
+    exchangeName: ""
+    queueName: "testing"
+    predeclared: true
+  delivery:
+    retry: 5
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: webhook
+      namespace: "{{.Release.Namespace}}"

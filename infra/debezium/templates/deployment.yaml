@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debezium
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debezium
+  template:
+    metadata:
+      namespace: {{ .Release.Namespace }}
+      labels:
+        app: debezium
+    spec:
+      volumes:
+        - name: applicationProperties
+          secret:
+            secretName: debezium-secret
+      containers:
+        - name: debezium
+          image: "debezium/server:{{ .Chart.AppVersion }}"
+          volumeMounts:
+            - name: applicationProperties
+              mountPath: /debezium/config/test.test
+              readOnly: true
+              subPath: applicationProperties
+          ports:
+            - name: http
+              containerPort: 8083

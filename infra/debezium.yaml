@@ -1,0 +1,43 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: debezium
+spec:
+  rules:
+    - name: debezium
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - debezium
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              tier: medium
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: debezium
+  namespace: argocd
+spec:
+  destination:
+    namespace: "debezium"
+    server: https://kubernetes.default.svc
+  source:
+    path: "infra/debezium"
+    repoURL: "${REPO_URL}"
+    helm:
+      valuesObject:
+        applicationProperties: "test"
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Wait=true

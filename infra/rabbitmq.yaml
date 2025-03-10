@@ -1,0 +1,43 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: rabbitmq
+spec:
+  rules:
+    - name: rabbitmq
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - rabbitmq
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              tier: medium
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rabbitmq
+  namespace: argocd
+spec:
+  destination:
+    namespace: rabbitmq
+    server: https://kubernetes.default.svc
+  source:
+    path: "operators/rabbitmq"
+    repoURL: "${REPO_URL}"
+    helm:
+      valueFiles:
+        - "values.yaml"
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Wait=true

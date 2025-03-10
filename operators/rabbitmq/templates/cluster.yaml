@@ -1,0 +1,18 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  namespace: "{{.Release.Namespace}}"
+spec:
+  replicas: {{.Values.replicas}}
+  service:
+    type: ClusterIP
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: tier
+                operator: In
+                values:
+                  - medium

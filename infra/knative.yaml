@@ -1,0 +1,70 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: knative
+spec:
+  rules:
+    - name: knative-operator
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - knative-operator
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              tier: low
+    - name: knative-serving
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - knative-serving
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              tier: low
+    - name: knative-eventing
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - knative-eventing
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              tier: low
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: knative
+  namespace: argocd
+spec:
+  destination:
+    namespace: "knative-operator"
+    server: https://kubernetes.default.svc
+  sources:
+    - path: "infra/knative"
+      repoURL: "${REPO_URL}"
+      helm:
+        valueFiles:
+          - "values.yaml"
+          - "values/${ENV}.yaml"
+    - path: "infra/knative-extensions"
+      repoURL: "${REPO_URL}"
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Wait=true

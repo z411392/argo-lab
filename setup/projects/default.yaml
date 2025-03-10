@@ -1,0 +1,51 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: testing
+spec:
+  rules:
+    - name: testing
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - testing
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              node-type: app
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: default
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: "${REPO_URL}"
+        revision: main
+        directories:
+          - path: "projects/default/apps/*"
+  template:
+    metadata:
+      name: "{{index .path.segments 3}}"
+    spec:
+      project: default
+      source:
+        path: "{{.path.path}}"
+        repoURL: "${REPO_URL}"
+      destination:
+        namespace: "{{index .path.segments 3}}"
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - Wait=true
