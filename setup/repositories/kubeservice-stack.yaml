@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+  name: "kubeservice-stack-helm-repository"
+stringData:
+  name: "kubeservice-stack"
+  type: "helm"
+  url: "https://kubeservice-stack.github.io/kubservice-charts"

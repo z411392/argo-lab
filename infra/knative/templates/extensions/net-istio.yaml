@@ -1,0 +1,2 @@
+# https://github.com/knative/net-istio/releases/download/knative-v1.17.0/net-istio.yaml
+{{ .Files.Get "net-istio/v1.17.0.yaml" }}

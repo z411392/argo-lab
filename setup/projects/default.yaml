@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: "${REPO_URL}"
+        revision: main
+        directories:
+          - path: "projects/default/apps/*"
+  template:
+    metadata:
+      name: "{{index .path.segments 3}}"
+      labels:
+        type: apps
+    spec:
+      project: default
+      source:
+        path: "{{.path.path}}"
+        repoURL: "${REPO_URL}"
+      destination:
+        namespace: "{{index .path.segments 3}}"
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true

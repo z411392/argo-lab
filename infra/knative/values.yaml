@@ -1,0 +1,11 @@
+cert-manager:
+  installCRDs: true
+  controller:
+    nodeSelector:
+      tier: low
+  webhook:
+    nodeSelector:
+      tier: low
+  cainjector:
+    nodeSelector:
+      tier: low

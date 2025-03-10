@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: knative
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  source:
+    path: "infra/knative"
+    repoURL: "${REPO_URL}"
+    helm:
+      valueFiles:
+        - "values.yaml"
+        - "values/${ENV}.yaml"
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - Wait=true

@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: registry-1.docker.io/bitnamicharts
+    chart: elasticsearch
+    targetRevision: "21.4.8"
+    helm:
+      valuesObject:
+        master:
+          masterOnly: false
+          replicaCount: 1
+          nodeSelector:
+            tier: high
+        data:
+          replicaCount: 0
+        coordinating:
+          replicaCount: 0
+        ingest:
+          replicaCount: 0
+  destination:
+    namespace: "elasticsearch"
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Wait=true

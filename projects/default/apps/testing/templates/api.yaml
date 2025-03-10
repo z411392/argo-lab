@@ -1,0 +1,24 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: api
+  namespace: "{{.Release.Namespace}}"
+spec:
+  template:
+    metadata:
+      namespace: "{{.Release.Namespace}}"
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+    spec:
+      containers:
+        - image: mendhak/http-https-echo
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8080
