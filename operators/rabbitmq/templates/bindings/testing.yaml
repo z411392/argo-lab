@@ -1,0 +1,13 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: testing
+  namespace: "{{.Release.Namespace}}"
+spec:
+  source: cdc
+  destination: testing
+  destinationType: queue
+  routingKey: "mysql.lab.testing"
+  rabbitmqClusterReference:
+    name: rabbitmq
+    namespace: "{{.Release.Namespace}}"

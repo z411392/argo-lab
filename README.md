@@ -26,9 +26,11 @@
 - https://medium.com/@mprzygrodzki/argocd-applicationsset-with-helm-72bb6362d494
 - https://medium.com/starbugs/argo-cd-applicationset-controller-%E4%B8%96%E7%95%8C%E7%82%BA%E6%88%91%E8%80%8C%E8%BD%89%E5%8B%95-a837f9392298
 
-### 各種 why
-#### istio
-Kourier 不支援 sticky sessions，所以 WebSocket 連線中可能會被重新分配到不同 pod，導致斷線。
-1. 換用 Istio，設定 sessionAffinity。
-2. 設計無狀態架構，將 WebSocket session 狀態存外部（如 Redis）。
-3. 固定 Knative pod 數量（將 `autoscaling.knative.dev/minScale` 和 `autoscaling.knative.dev/maxScale` 設為同樣的正整數），避免因為 scale in 導致的中斷。
+## 說明
+1. Network Layer 選用 istio。確保接下來如果有 WebSocket 的應用，可以設定 Session Affinity。
+  > 應將 `autoscaling.knative.dev/minScale` 和 `autoscaling.knative.dev/maxScale` 設置為同樣的正整數，避免因為 scale in 導致的中斷。
+2. 透過 Kyverno 將 namespace 安裝在特定節點上。
+3. 用 argocd 作 gitops。
+4. 在 Knative 中，讓 Eventing 用的 Service 只能接收來自內部 Source 的請求。
+5. 用 debezium 對 RDBMS 作 CDC（`db -> cdc exchange -> queue`, routing key 是 `mysql.{database}.{table}`）。
+6. 不同主專案用 namespace 切開，不同子專案用 chart 切開。

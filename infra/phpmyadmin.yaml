@@ -1,37 +1,41 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: rabbitmq
+  name: phpmyadmin
 spec:
   rules:
-    - name: rabbitmq
+    - name: phpmyadmin
       match:
         resources:
           kinds:
             - Pod
           namespaces:
-            - amqp
+            - phpmyadmin
       mutate:
         patchStrategicMerge:
           spec:
             nodeSelector:
-              tier: medium
+              tier: low
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: rabbitmq
+  name: phpmyadmin
   namespace: argocd
 spec:
   destination:
-    namespace: amqp
+    namespace: phpmyadmin
     server: https://kubernetes.default.svc
   source:
-    path: "operators/rabbitmq"
-    repoURL: "${REPO_URL}"
+    path: ""
+    repoURL: registry-1.docker.io/bitnamicharts
+    chart: phpmyadmin
+    targetRevision: "18.1.4"
     helm:
-      valueFiles:
-        - "values.yaml"
+      valuesObject:
+        db:
+          allowArbitraryServer: false
+          host: "${DB_HOST}"
   project: default
   syncPolicy:
     automated:

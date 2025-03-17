@@ -1,0 +1,13 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: cdc
+  namespace: "{{.Release.Namespace}}"
+spec:
+  name: cdc
+  type: topic
+  autoDelete: false
+  durable: true
+  rabbitmqClusterReference:
+    name: rabbitmq
+    namespace: "{{.Release.Namespace}}"

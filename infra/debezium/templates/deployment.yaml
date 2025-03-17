@@ -15,17 +15,17 @@ spec:
         app: debezium
     spec:
       volumes:
-        - name: applicationProperties
+        - name: debezium-secret
           secret:
             secretName: debezium-secret
       containers:
         - name: debezium
           image: "debezium/server:{{ .Chart.AppVersion }}"
           volumeMounts:
-            - name: applicationProperties
-              mountPath: /debezium/config/test.test
+            - name: debezium-secret
+              mountPath: /debezium/config/application.properties
               readOnly: true
-              subPath: applicationProperties
+              subPath: properties
           ports:
             - name: http
               containerPort: 8083

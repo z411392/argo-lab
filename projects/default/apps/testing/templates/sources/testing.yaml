@@ -6,9 +6,9 @@ metadata:
 spec:
   rabbitmqClusterReference:
     name: rabbitmq
-    namespace: rabbitmq
+    namespace: amqp
   rabbitmqResourcesConfig:
-    exchangeName: ""
+    exchangeName: "cdc"
     queueName: "testing"
     predeclared: true
   delivery:
